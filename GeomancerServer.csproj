@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+    <PropertyGroup>
+        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectGuid>{BFC8647D-7D1F-4381-8853-12D0AB79A4C0}</ProjectGuid>
+        <OutputType>Exe</OutputType>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <RootNamespace>GeomancerServer</RootNamespace>
+        <AssemblyName>GeomancerServer</AssemblyName>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <FileAlignment>512</FileAlignment>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <OutputPath>bin\Debug\</OutputPath>
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <OutputPath>bin\Release\</OutputPath>
+        <DefineConstants>TRACE</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+    </PropertyGroup>
+    <ItemGroup>
+        <Reference Include="System" />
+        <Reference Include="System.Core" />
+        <Reference Include="System.Data" />
+        <Reference Include="System.Xml" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Animation\Vec4i\AddVec4iAnimation.cs">
+          <Link>Model\Animation\Vec4i\AddVec4iAnimation.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Animation\Vec4i\ConstantVec4iAnimation.cs">
+          <Link>Model\Animation\Vec4i\ConstantVec4iAnimation.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Animation\Vec4i\DivideVec4iAnimation.cs">
+          <Link>Model\Animation\Vec4i\DivideVec4iAnimation.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Animation\Vec4i\IVec4iAnimation.cs">
+          <Link>Model\Animation\Vec4i\IVec4iAnimation.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Animation\Vec4i\MultiplyVec4iAnimation.cs">
+          <Link>Model\Animation\Vec4i\MultiplyVec4iAnimation.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\FixedK.cs">
+          <Link>Model\FixedK.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\InitialSymbol.cs">
+          <Link>Model\InitialSymbol.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\InitialTile.cs">
+          <Link>Model\InitialTile.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\InitialUnit.cs">
+          <Link>Model\InitialUnit.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\JsonHarvester.cs">
+          <Link>Model\JsonHarvester.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\ListUtils.cs">
+          <Link>Model\ListUtils.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Location.cs">
+          <Link>Model\Location.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Messages.cs">
+          <Link>Model\Messages.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\ParseSource.cs">
+          <Link>Model\ParseSource.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Pattern.cs">
+          <Link>Model\Pattern.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\PatternCornerAdjacency.cs">
+          <Link>Model\PatternCornerAdjacency.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\PatternCornerAdjacencyImmList.cs">
+          <Link>Model\PatternCornerAdjacencyImmList.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\PatternCornerAdjacencyImmListImmList.cs">
+          <Link>Model\PatternCornerAdjacencyImmListImmList.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\PatternSideAdjacency.cs">
+          <Link>Model\PatternSideAdjacency.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\PatternSideAdjacencyImmList.cs">
+          <Link>Model\PatternSideAdjacencyImmList.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\PatternTile.cs">
+          <Link>Model\PatternTile.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\PatternTileImmList.cs">
+          <Link>Model\PatternTileImmList.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\PrimitivesExtensions.cs">
+          <Link>Model\PrimitivesExtensions.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Rand.cs">
+          <Link>Model\Rand.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\SetUtils.cs">
+          <Link>Model\SetUtils.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\SymbolId.cs">
+          <Link>Model\SymbolId.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Terrain.cs">
+          <Link>Model\Terrain.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\TerrainTile.cs">
+          <Link>Model\TerrainTile.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Vec2.cs">
+          <Link>Model\Vec2.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Vec2ImmList.cs">
+          <Link>Model\Vec2ImmList.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Vec2ImmListImmList.cs">
+          <Link>Model\Vec2ImmListImmList.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Vec3.cs">
+          <Link>Model\Vec3.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Vec4i.cs">
+          <Link>Model\Vec4i.cs</Link>
+        </Compile>
+        <Compile Include="Asserts.cs" />
+        <Compile Include="ControllerRoot.cs" />
+        <Compile Include="EditorServer.cs" />
+        <Compile Include="HttpServer.cs" />
+        <Compile Include="JsonHarvester.cs" />
+        <Compile Include="Jsonify.cs" />
+        <Compile Include="LineWrapper.cs" />
+        <Compile Include="ListView.cs" />
+        <Compile Include="LookPanelView.cs" />
+        <Compile Include="MemberToViewMapper.cs" />
+        <Compile Include="ModelExtensions.cs" />
+        <Compile Include="Network\Connection.cs" />
+        <Compile Include="Network\Panel.cs" />
+        <Compile Include="PentagonPattern9.cs" />
+        <Compile Include="PhantomTilePresenter.cs" />
+        <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="SideControlsView.cs" />
+        <Compile Include="SimpleJSON.cs" />
+        <Compile Include="TerrainController.cs" />
+        <Compile Include="TerrainTileController.cs" />
+    </ItemGroup>
+    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+         Other similar extension points exist, see Microsoft.Common.targets.
+    <Target Name="BeforeBuild">
+    </Target>
+    <Target Name="AfterBuild">
+    </Target>
+    -->
+
+</Project>
