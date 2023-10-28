@@ -113,6 +113,9 @@
         <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\SetUtils.cs">
           <Link>Model\SetUtils.cs</Link>
         </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Style.cs">
+          <Link>Model\Style.cs</Link>
+        </Compile>
         <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\SymbolId.cs">
           <Link>Model\SymbolId.cs</Link>
         </Compile>
@@ -121,6 +124,9 @@
         </Compile>
         <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\TerrainTile.cs">
           <Link>Model\TerrainTile.cs</Link>
+        </Compile>
+        <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\TileStyle.cs">
+          <Link>Model\TileStyle.cs</Link>
         </Compile>
         <Compile Include="..\Domino\Assets\Geomancer\Scripts\Model\Vec2.cs">
           <Link>Model\Vec2.cs</Link>
@@ -141,15 +147,19 @@
         <Compile Include="ControllerRoot.cs" />
         <Compile Include="EditorServer.cs" />
         <Compile Include="HttpServer.cs" />
-        <Compile Include="JsonHarvester.cs" />
+        <Compile Include="HudView.cs" />
         <Compile Include="Jsonify.cs" />
+        <Compile Include="LevelContentsDetailsView.cs" />
+        <Compile Include="LevelContentsListView.cs" />
+        <Compile Include="LevelView.cs" />
         <Compile Include="LineWrapper.cs" />
         <Compile Include="ListView.cs" />
         <Compile Include="LookPanelView.cs" />
-        <Compile Include="MemberToViewMapper.cs" />
+        <Compile Include="MemberToViewMapperOld.cs" />
         <Compile Include="ModelExtensions.cs" />
         <Compile Include="Network\Connection.cs" />
         <Compile Include="Network\Panel.cs" />
+        <Compile Include="oldListView.cs" />
         <Compile Include="PentagonPattern9.cs" />
         <Compile Include="PhantomTilePresenter.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
@@ -157,6 +167,7 @@
         <Compile Include="SimpleJSON.cs" />
         <Compile Include="TerrainController.cs" />
         <Compile Include="TerrainTileController.cs" />
+        <Compile Include="ToolbarView.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,29 +1,24 @@
-﻿// using System.Collections;
-// using System.Collections.Generic;
-//
-// using Domino;
-// using Geomancer.Model;
-//
+﻿using System.Collections;
+using System.Collections.Generic;
+
+using Domino;
+using Geomancer.Model;
+
 // namespace Geomancer {
 //   public class ListView {
 //     public class Entry {
 //       public SymbolId symbol;
-//       public Vec4i symbolColor;
 //       public string text;
-//       public Vec4i textColor;
 //
-//       public Entry(SymbolId symbol, Vec4i symbolColor, string text, Vec4i textColor) {
+//       public Entry(SymbolId symbol, string text) {
 //         this.symbol = symbol;
-//         this.symbolColor = symbolColor;
 //         this.text = text;
-//         this.textColor = textColor;
 //       }
 //     }
 //
 //     private GameToDominoConnection domino;
 //
 //     private string panelId = "";
-//     private string listId = "";
 //     // private Panel panel;
 //     private readonly int viewGW, viewGH;
 //     private List<string> descendantIds;
@@ -42,8 +37,7 @@
 //       this.domino = domino;
 //       this.viewGW = viewGW;
 //       this.viewGH = viewGH;
-//       this.panelId = domino.MakePanel("", x, y, viewGW, viewGH);
-//       this.listId = domino.MakeList(panelId, x, y, viewGW, viewGH);
+//       this.panelId = domino.MakePanel(x, y, viewGW, viewGH);
 //       descendantIds = new List<string>();
 //       //this.cinematicTimer = cinematicTimer;
 //       //this.overlayPaneler = overlayPaneler;
@@ -62,13 +56,8 @@
 //
 //         for (int i = 0; i < entries.Count; i++) {
 //           // view.AddSymbol(0, 1, view.symbolsHigh - (i * 2 + 2), 2.0f, 0, new Color(1, 1, 1), entries[i].symbol);
-//           string spanId = domino.AddInlineSpan(panelId, new Vec4i(255, 255, 255, 255));
-//           if (entries[i].symbol != null) {
-//             domino.AddInlineSymbol(spanId, entries[i].symbolColor, entries[i].symbol);
-//           }
-//           domino.AddInlineString(spanId, entries[i].textColor, entries[i].text);
-//           // descendantIds.AddRange(
-//           //   domino.AddString(panelId, 5, viewGH - (i * 2 + 2000 - 500), viewGW - 3, new Vec4i(255, 255, 255, 255), "Cascadia", entries[i].text));
+//           descendantIds.AddRange(
+//             domino.AddString(panelId, 5, viewGH - (i * 2 + 2000 - 500), viewGW - 3, new Vec4i(255, 255, 255, 255), "Cascadia", entries[i].text));
 //         }
 //       }
 //     }

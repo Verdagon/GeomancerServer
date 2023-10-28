@@ -78,7 +78,15 @@ namespace GeomancerServer {
       json.Add("pattern_tiles", obj.patternTiles.ToJson());
       return json;
     }
-    
+
+    public static JSONArray ToJson(this string[] obj) {
+      var arr = new JSONArray();
+      foreach (var x in obj) {
+        arr.Add(x);
+      }
+      return arr;
+    }
+
     public static JSONArray ToJson(this PatternTileImmList obj) {
       var json = new JSONArray();
       foreach (var el in obj) {
@@ -100,6 +108,12 @@ namespace GeomancerServer {
       }
       return json;
     }
+    public static JSONObject ToJson(this (string, InitialSymbol) obj) {
+      var json = new JSONObject();
+      json.Add("id", obj.Item1);
+      json.Add("symbol", obj.Item2.ToJson());
+      return json;
+    }
     public static JSONObject ToJson(this (ulong, InitialSymbol) obj) {
       var json = new JSONObject();
       json.Add("id", obj.Item1);
@@ -113,7 +127,21 @@ namespace GeomancerServer {
       }
       return json;
     }
-    
+    public static JSONArray ToJson(this List<(string, InitialSymbol)> obj) {
+      var json = new JSONArray();
+      foreach (var el in obj) {
+        json.Add(el.ToJson());
+      }
+      return json;
+    }
+    public static JSONArray ToJson(this List<string> obj) {
+      var json = new JSONArray();
+      foreach (var el in obj) {
+        json.Add(el);
+      }
+      return json;
+    }
+
     public static JSONObject ToJson(this Location obj) {
       var json = new JSONObject();
       json.Add("group_x", obj.groupX);
@@ -236,11 +264,32 @@ namespace GeomancerServer {
       var json = new JSONObject();
       json.Add("location", obj.location.ToJson());
       json.Add("elevation", obj.elevation);
-      json.Add("top_color", obj.topColor.ToJson());
-      json.Add("side_color", obj.sideColor.ToJson());
-      json.Add("maybe_overlay_symbol", obj.maybeOverlaySymbol.ToJson());
-      json.Add("maybe_feature_symbol", obj.maybeFeatureSymbol.ToJson());
+      json.Add("styles", obj.tileStyles.ToJson());
+      // json.Add("surface_color", obj.topColor.ToJson());
+      // json.Add("wall_color", obj.wallColor.ToJson());
+      // json.Add("overlay_symbol", obj.maybeOverlaySymbol.ToJson());
+      // json.Add("feature_symbol", obj.maybeFeatureSymbol.ToJson());
       json.Add("item_id_to_symbol", obj.itemIdToSymbol.ToJson());
+      return json;
+    }
+
+    public static JSONObject ToJson(this Style obj) {
+      var json = new JSONObject();
+      json.Add("name", obj.name);
+
+      if (obj.maybeTileStyle == null) {
+        json.Add("tile_style", JSONNull.CreateOrGet());
+      } else {
+        json.Add("tile_style", obj.maybeTileStyle.ToJson());
+      }
+      return json;
+    }
+    public static JSONObject ToJson(this TileStyle obj) {
+      var json = new JSONObject();
+      json.Add("surface_color", obj.topColor.ToJson());
+      json.Add("wall_color", obj.wallColor.ToJson());
+      json.Add("overlay_symbol", obj.maybeOverlaySymbol.ToJson());
+      json.Add("feature_symbol", obj.maybeFeatureSymbol.ToJson());
       return json;
     }
 
@@ -254,10 +303,43 @@ namespace GeomancerServer {
       return json;
     }
 
+    public static JSONObject ToJson(this CreateTreeMessage obj) {
+      var json = new JSONObject();
+      json.Add("ICommand", "CreateTreeCommand");
+      json.Add("id", obj.id);
+      json.Add("nodeIds", obj.nodeIds.ToJson());
+      return json;
+    }
+
+    public static JSONObject ToJson(this CreateLabelMessage obj) {
+      var json = new JSONObject();
+      json.Add("ICommand", "CreateLabelCommand");
+      json.Add("id", obj.id);
+      json.Add("text", obj.text);
+      return json;
+    }
+
+    public static JSONObject ToJson(this AddViewMessage obj) {
+      var json = new JSONObject();
+      json.Add("ICommand", "AddViewCommand");
+      json.Add("id", obj.id);
+      json.Add("parentId", obj.parentId);
+      return json;
+    }
+
+    public static JSONObject ToJson(this CreateTreeNodeMessage obj) {
+      var json = new JSONObject();
+      json.Add("ICommand", "CreateTreeNodeCommand");
+      json.Add("id", obj.id);
+      json.Add("id", obj.nodeIds.ToJson());
+      return json;
+    }
+
     public static JSONObject ToJson(this MakePanelMessage obj) {
       var json = new JSONObject();
       json.Add("ICommand", "MakePanelCommand");
       json.Add("id", obj.id);
+      json.Add("parent_id", obj.parentId);
       json.Add("panel_grid_x_in_screen", obj.panelGXInScreen);
       json.Add("panel_grid_y_in_screen", obj.panelGYInScreen);
       json.Add("panel_grid_width", obj.panelGW);
@@ -280,6 +362,14 @@ namespace GeomancerServer {
       return json;
     }
 
+    public static JSONObject ToJson(this CreateStyleMessage obj) {
+      var json = new JSONObject();
+      json.Add("ICommand", "CreateStyleCommand");
+      json.Add("style_id", obj.newStyleId);
+      json.Add("style", obj.style.ToJson());
+      return json;
+    }
+
     public static JSONObject ToJson(this SetSurfaceColorMessage obj) {
       var json = new JSONObject();
       json.Add("ICommand", "SetSurfaceColorCommand");
@@ -292,39 +382,68 @@ namespace GeomancerServer {
       var json = new JSONObject();
       json.Add("ICommand", "SetCliffColorCommand");
       json.Add("tile_id", obj.tileViewId);
-      json.Add("color", obj.sideColor.ToJson());
+      json.Add("color", obj.wallColor.ToJson());
       return json;
     }
 
-    public static JSONObject ToJson(this AddRectangleMessage obj) {
-      var json = new JSONObject();
-      json.Add("ICommand", "AddRectangleCommand");
-      json.Add("new_view_id", obj.newViewId);
-      json.Add("parent_view_id", obj.parentViewId);
-      json.Add("x", obj.x);
-      json.Add("y", obj.y);
-      json.Add("width", obj.width);
-      json.Add("height", obj.height);
-      json.Add("z", obj.z);
-      json.Add("color", obj.color.ToJson());
-      json.Add("border_color", obj.borderColor.ToJson());
-      return json;
-    }
+    // public static JSONObject ToJson(this AddRectangleMessage obj) {
+    //   var json = new JSONObject();
+    //   json.Add("ICommand", "AddRectangleCommand");
+    //   json.Add("new_view_id", obj.newViewId);
+    //   json.Add("parent_view_id", obj.parentViewId);
+    //   json.Add("x", obj.x);
+    //   json.Add("y", obj.y);
+    //   json.Add("width", obj.width);
+    //   json.Add("height", obj.height);
+    //   json.Add("z", obj.z);
+    //   json.Add("color", obj.color.ToJson());
+    //   json.Add("border_color", obj.borderColor.ToJson());
+    //   return json;
+    // }
 
-    public static JSONObject ToJson(this AddSymbolMessage obj) {
-      var json = new JSONObject();
-      json.Add("ICommand", "AddSymbolCommand");
-      json.Add("new_view_id", obj.newViewId);
-      json.Add("parent_view_id", obj.parentViewId);
-      json.Add("x", obj.x);
-      json.Add("y", obj.y);
-      json.Add("size", obj.size);
-      json.Add("z", obj.z);
-      json.Add("color", obj.color.ToJson());
-      json.Add("symbol_id", obj.symbolId.ToJson());
-      json.Add("centered", obj.centered);
-      return json;
-    }
+    // public static JSONObject ToJson(this AddSymbolMessage obj) {
+    //   var json = new JSONObject();
+    //   json.Add("ICommand", "AddSymbolCommand");
+    //   json.Add("new_view_id", obj.newViewId);
+    //   json.Add("parent_view_id", obj.parentViewId);
+    //   json.Add("x", obj.x);
+    //   json.Add("y", obj.y);
+    //   json.Add("size", obj.size);
+    //   json.Add("z", obj.z);
+    //   json.Add("color", obj.color.ToJson());
+    //   json.Add("symbol_id", obj.symbolId.ToJson());
+    //   json.Add("centered", obj.centered);
+    //   return json;
+    // }
+
+    // public static JSONObject ToJson(this AddInlineSymbolMessage obj) {
+    //   var json = new JSONObject();
+    //   json.Add("ICommand", "AddInlineSymbolCommand");
+    //   json.Add("new_view_id", obj.newViewId);
+    //   json.Add("parent_view_id", obj.parentViewId);
+    //   json.Add("color", obj.color.ToJson());
+    //   json.Add("text", obj.symbolId.ToJson());
+    //   return json;
+    // }
+
+    // public static JSONObject ToJson(this AddInlineStringMessage obj) {
+    //   var json = new JSONObject();
+    //   json.Add("ICommand", "AddInlineStringCommand");
+    //   json.Add("new_view_id", obj.newViewId);
+    //   json.Add("parent_view_id", obj.parentViewId);
+    //   json.Add("color", obj.color.ToJson());
+    //   json.Add("text", obj.text);
+    //   return json;
+    // }
+
+    // public static JSONObject ToJson(this AddInlineSpanMessage obj) {
+    //   var json = new JSONObject();
+    //   json.Add("ICommand", "AddInlineSpanCommand");
+    //   json.Add("new_view_id", obj.newViewId);
+    //   json.Add("parent_view_id", obj.parentViewId);
+    //   json.Add("color", obj.color.ToJson());
+    //   return json;
+    // }
 
     public static JSONObject ToJson(this ScheduleCloseMessage obj) {
       var json = new JSONObject();
@@ -402,23 +521,74 @@ namespace GeomancerServer {
       return json;
     }
 
+    public static JSONObject ToJson(this CreateButtonMessage obj) {
+      var json = new JSONObject();
+      json.Add("ICommand", "CreateButtonCommand");
+      json.Add("id", obj.id);
+      json.Add("icon", obj.icon);
+      json.Add("label", obj.label);
+      json.Add("data", obj.data);
+      return json;
+    }
+
+    public static JSONObject ToJson(this CreateContainerMessage obj) {
+      var json = new JSONObject();
+      json.Add("ICommand", "CreateContainerCommand");
+      json.Add("id", obj.id);
+      json.Add("length", obj.length);
+      json.Add("direction", obj.direction.ToString());
+      json.Add("childMargin", obj.childMargin);
+      json.Add("childIds", obj.childIds.ToJson());
+      return json;
+    }
+
+    public static JSONObject ToJson(this CreateCollapserMessage obj) {
+      var json = new JSONObject();
+      json.Add("ICommand", "CreateCollapserCommand");
+      json.Add("id", obj.id);
+      json.Add("position", obj.position.ToString());
+      json.Add("large", obj.large);
+      json.Add("strategy", obj.strategy.ToString());
+      json.Add("collapsedId", obj.collapsedId);
+      json.Add("expandedId", obj.expandedId);
+      return json;
+    }
+
+    public static JSONObject ToJson(this SetCollapserOpenMessage obj) {
+      var json = new JSONObject();
+      json.Add("ICommand", "SetCollapserOpenCommand");
+      json.Add("id", obj.id);
+      json.Add("open", obj.open);
+      return json;
+    }
+
     public static JSONObject ToJson(this IDominoMessage command) {
       if (command is SetupGameMessage setupGame) {
         return setupGame.ToJson();
       } else if (command is MakePanelMessage makePanel) {
         return makePanel.ToJson();
+      // } else if (command is MakeListMessage makeList) {
+      //   return makeList.ToJson();
       } else if (command is CreateTileMessage createTile) {
         return createTile.ToJson();
+      } else if (command is CreateStyleMessage createStyle) {
+        return createStyle.ToJson();
       } else if (command is DestroyTileMessage destroyTile) {
         return destroyTile.ToJson();
       } else if (command is SetSurfaceColorMessage setSurfaceColor) {
         return setSurfaceColor.ToJson();
       } else if (command is SetCliffColorMessage setCliffColor) {
         return setCliffColor.ToJson();
-      } else if (command is AddRectangleMessage addRectangle) {
-        return addRectangle.ToJson();
-      } else if (command is AddSymbolMessage addSymbol) {
-        return addSymbol.ToJson();
+      // } else if (command is AddRectangleMessage addRectangle) {
+      //   return addRectangle.ToJson();
+      // } else if (command is AddSymbolMessage addSymbol) {
+      //   return addSymbol.ToJson();
+      // } else if (command is AddInlineSpanMessage addInlineSpan) {
+      //   return addInlineSpan.ToJson();
+      // } else if (command is AddInlineStringMessage addInlineString) {
+      //   return addInlineString.ToJson();
+      // } else if (command is AddInlineSymbolMessage addInlineSymbol) {
+      //   return addInlineSymbol.ToJson();
       } else if (command is ScheduleCloseMessage scheduleClose) {
         return scheduleClose.ToJson();
       } else if (command is SetElevationMessage setElevation) {
@@ -433,10 +603,26 @@ namespace GeomancerServer {
         return removeView.ToJson();
       } else if (command is CreateUnitMessage createUnit) {
         return createUnit.ToJson();
+      } else if (command is CreateTreeMessage createTree) {
+        return createTree.ToJson();
+      } else if (command is CreateLabelMessage createLabel) {
+        return createLabel.ToJson();
+      } else if (command is AddViewMessage addView) {
+        return addView.ToJson();
+      } else if (command is CreateTreeNodeMessage createTreeNode) {
+        return createTreeNode.ToJson();
       } else if (command is DestroyUnitMessage destroyUnit) {
         return destroyUnit.ToJson();
+      } else if (command is CreateButtonMessage createButton) {
+        return createButton.ToJson();
+      } else if (command is CreateContainerMessage createContainer) {
+        return createContainer.ToJson();
+      } else if (command is CreateCollapserMessage createCollapser) {
+        return createCollapser.ToJson();
+      } else if (command is SetCollapserOpenMessage setCollapser) {
+        return setCollapser.ToJson();
       } else {
-        Asserts.Assert(false);
+        Asserts.Assert(false, "Unknown message to jsonify: " + command.GetType().ToString());
         return null;
       }
     }

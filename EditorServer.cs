@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Domino;
 using Geomancer.Model;
-
+using SimpleJSON;
 using Terrain = Geomancer.Model.Terrain;
 
 namespace Geomancer {
@@ -39,13 +39,18 @@ namespace Geomancer {
     private int screenGW = 0;
     private int screenGH = 0;
     private Terrain terrain;
-    private LookPanelView lookPanelView;
+
+    private string levelContentsListContainerId;
+    private LevelContentsListView levelContentsListView;
+    private HudView hudView;
+    private LevelView levelView;
+    private ToolbarView toolbarView;
+
     TerrainController terrainPresenter;
     private SortedSet<Location> selectedLocations = new SortedSet<Location>();
-    private ListView membersView;
     private Location maybeHoveredLocation;
     private Location maybeLookedLocation;
-    private MemberToViewMapper vivimap;
+    private Dictionary<string, TileStyle> tileStylees;
 
     public EditorServer(
         string resourcesPath,
@@ -53,10 +58,7 @@ namespace Geomancer {
         int screenGW,
         int screenGH) {
       this.domino = domino;
-      
-      // var resourcesPath = //Application.streamingAssetsPath;
-      
-      
+
       this.screenGW = screenGW;
       this.screenGH = screenGH;
       
@@ -114,22 +116,62 @@ namespace Geomancer {
           lookatOffsetToCamera,
           elevationStepHeight, pattern);
 
-      membersView = new ListView(domino, 0, 0, 40, 16);
-      lookPanelView = new LookPanelView(domino, screenGW, -1, 2);
 
-      vivimap = MemberToViewMapper.LoadMap(resourcesPath, "vivimap.json");
-      terrainPresenter = new TerrainController(domino, vivimap, terrain);
+      domino.AddView(
+          "__rootContainer",
+          levelContentsListContainerId =
+              domino.CreateContainer("100%", Direction.horizontal, "",
+                new string[] {
+                  (levelContentsListView = new LevelContentsListView(domino)).getViewId(),
+                  domino.CreateContainer("grow", Direction.vertical, "",
+                      new string[] {
+                      (hudView = new HudView(domino)).getViewId(),
+                      domino.CreateContainer("grow", Direction.vertical, "",
+                          new string[] {
+                          (levelView = new LevelView(domino)).getViewId()
+                      })
+                  }),
+                  (toolbarView = new ToolbarView(domino)).getViewId()
+                }));
+
+      var styleMap =
+          JsonHarvester.ParseIdToStyleMap(
+              JsonHarvester.LoadFromFile(resourcesPath, "vivimap.json"));
+      styleMap.Add(
+          "_phantom",
+          new Style(
+              "_phantom",
+              new TileStyle(
+                  new ConstantVec4iAnimation(new Vec4i(64, 64, 64, 255)),
+                  new ConstantVec4iAnimation(new Vec4i(48, 48, 48, 255)),
+                  null,
+                  null)));
+      var idToStyleMap = new Dictionary<string, Style>();
+      foreach (var entry in styleMap) {
+        var name = entry.Key;
+        var style = entry.Value;
+        var id = domino.CreateStyle(style);
+        idToStyleMap.Add(id, style);
+      }
+
+      // private List<(string, IVec4iAnimation)> membersFrontColors = new List<(string, IVec4iAnimation)>();
+    // private List<(string, IVec4iAnimation)> membersSideColors = new List<(string, IVec4iAnimation)>();
+    // private List<(string, InitialSymbol)> membersFeatures = new List<(string, InitialSymbol)>();
+    // private List<(string, InitialSymbol)> membersOverlays = new List<(string, InitialSymbol)>();
+    // private List<(string, InitialSymbol)> membersItems = new List<(string, InitialSymbol)>();
+
+      terrainPresenter = new TerrainController(domino, terrain);
       terrainPresenter.PhantomTileClicked += HandlePhantomTileClicked;
       terrainPresenter.TerrainTileClicked += HandleTerrainTileClicked;
       terrainPresenter.TerrainTileHovered += HandleTerrainTileHovered;
     }
 
-    public void SetHoveredLocation(ulong tileViewId, Location newMaybeHoveredLocation) {
+    public void SetHoveredLocation(string tileViewId, Location newMaybeHoveredLocation) {
       terrainPresenter.SetHoveredLocation(newMaybeHoveredLocation);
       HandleTerrainTileHovered(newMaybeHoveredLocation);
     }
 
-    public void LocationMouseDown(ulong tileViewId, Location location) {
+    public void LocationMouseDown(string tileViewId, Location location) {
       terrainPresenter.LocationMouseDown(tileViewId, location);
     }
 
@@ -147,29 +189,29 @@ namespace Geomancer {
           SetSelection(allLocations);
           break;
         case 'z':
-          var panelId = domino.MakePanel(-1, -1, screenGW + 2, screenGH + 2);
-          var rect = domino.AddRectangle(panelId, 0, 0, screenGW + 2, screenGH + 2, 0, Vec4i.black, Vec4i.black);
-          GameToDominoConnection.IEventHandler remove = null;
-          var onClick = domino.MakeEvent(() => {
-            Console.WriteLine("clicked!");
-            remove();
-          });
-          var onMouseIn = domino.MakeEvent(() => Console.WriteLine("mouse in!"));
-          var onMouseOut = domino.MakeEvent(() => Console.WriteLine("mouse out!"));
-          var button = domino.AddButton(
-              rect, 2, 2, 15, 4, 0, new Vec4i(153, 153, 153, 255), new Vec4i(153, 153, 153, 255), new Vec4i(102, 102, 102, 255), onClick, onMouseIn, onMouseOut);
-          var strIds = domino.AddString(button, 3, 3, 15, Vec4i.cyan, "Cascadia", "hello");
-          remove = () => {
-            foreach (var id in strIds) {
-              domino.RemoveView(id);
-            }
-            domino.RemoveView(button);
-            domino.DestroyEvent(onMouseOut);
-            domino.DestroyEvent(onMouseIn);
-            domino.DestroyEvent(onClick);
-            domino.RemoveView(rect);
-            domino.RemoveView(panelId);
-          };
+          // var panelId = domino.MakePanel("", -1, -1, screenGW + 2, screenGH + 2);
+          // var rect = domino.AddRectangle(panelId, 0, 0, screenGW + 2, screenGH + 2, 0, Vec4i.black, Vec4i.black);
+          // GameToDominoConnection.IEventHandler remove = null;
+          // var onClick = domino.MakeEvent(() => {
+          //   Console.WriteLine("clicked!");
+          //   remove();
+          // });
+          // var onMouseIn = domino.MakeEvent(() => Console.WriteLine("mouse in!"));
+          // var onMouseOut = domino.MakeEvent(() => Console.WriteLine("mouse out!"));
+          // var button = domino.AddButton(
+          //     rect, 2, 2, 15, 4, 0, new Vec4i(153, 153, 153, 255), new Vec4i(153, 153, 153, 255), new Vec4i(102, 102, 102, 255), onClick, onMouseIn, onMouseOut);
+          // var strIds = domino.AddString(button, 3, 3, 15, Vec4i.cyan, "Cascadia", "hello");
+          // remove = () => {
+          //   foreach (var id in strIds) {
+          //     domino.RemoveView(id);
+          //   }
+          //   domino.RemoveView(button);
+          //   domino.DestroyEvent(onMouseOut);
+          //   domino.DestroyEvent(onMouseIn);
+          //   domino.DestroyEvent(onClick);
+          //   domino.RemoveView(rect);
+          //   domino.RemoveView(panelId);
+          // };
           break;
         case '=':
         case '+':
@@ -237,6 +279,20 @@ namespace Geomancer {
       UpdateLookPanelView();
     }
 
+    public void HandleCustomRequest(JSONObject obj) {
+      var type = JsonHarvester.ExpectMemberString(obj, "request");
+      switch (type) {
+        case "ExpandLevelContentsListViewRequest":
+          this.levelContentsListView.HandleExpand();
+          break;
+        case "ExpandLevelContentsDetailsViewRequest":
+          this.levelContentsListView.HandleExpandDetails();
+          break;
+        default:
+          throw new Exception("Unknown custom request: " + type);
+      }
+    }
+
     private void Save() {
       using (var fileStream = new FileStream("level.lev", FileMode.Create)) {
         using (var writer = new StreamWriter(fileStream)) {
@@ -289,13 +345,18 @@ namespace Geomancer {
         }
       }
 
-      var entries = new List<ListView.Entry>();
-      if (commonMembers != null) {
-        foreach (var member in commonMembers) {
-          entries.Add(new ListView.Entry(new SymbolId("AthSymbols", 0x0072), member));
-        }
-      }
-      membersView.ShowEntries(entries);
+      // var entries = new List<ListView.Entry>();
+      // if (commonMembers != null) {
+      //   foreach (var member in commonMembers) {
+      //     entries.Add(
+      //         new ListView.Entry(
+      //             new SymbolId("AthSymbols", 0x0072),
+      //             new Vec4i(255, 255, 255, 255),
+      //             member,
+      //             new Vec4i(255, 255, 255, 255)));
+      //   }
+      // }
+      // membersView.ShowEntries(entries);
     }
     
     private void UpdateLookPanelView() {
@@ -303,7 +364,7 @@ namespace Geomancer {
       if (location != maybeLookedLocation) {
         maybeLookedLocation = location;
         if (location == null) {
-          lookPanelView.SetStuff(false, "", "", new List<KeyValuePair<InitialSymbol, string>>());
+          // lookPanelView.SetStuff(false, "", "", new List<KeyValuePair<InitialSymbol, string>>());
         } else {
           var message = "(" + location.groupX + ", " + location.groupY + ", " + location.indexInGroup + ")";
 
@@ -326,7 +387,7 @@ namespace Geomancer {
             }
           }
 
-          lookPanelView.SetStuff(true, message, "", symbolsAndDescriptions);
+          // lookPanelView.SetStuff(true, message, "", symbolsAndDescriptions);
         }
       }
     }
@@ -363,7 +424,6 @@ namespace Geomancer {
           }
         }
       }
-      
     }
 
     private bool AllLocationsHaveMember(SortedSet<Location> locations, string member) {

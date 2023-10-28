@@ -1,20 +1,28 @@
 {
   "grass": {
-    "surface_color": [0, 75, 0],
-    "wall_color": [0, 50, 0],
+    "tile": {
+      "surface_color": [0, 75, 0],
+      "wall_color": [0, 50, 0]
+    }
   },
   "dirt": {
-    "surface_color": [100, 32, 0],
-    "wall_color": [64, 25, 0],
+    "tile": {
+      "surface_color": [100, 32, 0],
+      "wall_color": [64, 25, 0]
+    }
   },
   "mud": {
-    "surface_color": [50, 16, 0],
-    "wall_color": [32, 12, 0],
+    "tile": {
+      "surface_color": [50, 16, 0],
+      "wall_color": [32, 12, 0]
+    }
   },
   "rocks": {
-    "overlay": {
-      "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 102}, "color": [128, 128, 128, 50] },
-      "outline": {"type": "outer", "color": [0, 0, 0] }
+    "tile": {
+      "overlay_symbol": {
+        "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 102}, "color": [128, 128, 128, 50] },
+        "outline": {"type": "outer", "color": [0, 0, 0] }
+      }
     }
   },
   "healthPotion": {
@@ -35,14 +43,18 @@
     }
   },
   "fire": {
-    "feature": {
-      "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 114}, "color": [200, 100, 0, 380]}
+    "tile": {
+      "feature": {
+        "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 114}, "color": [200, 100, 0, 380]}
+      }
     }
   },
   "magma": {
-    "overlay": {
-      "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 114}, "color": [255, 100, 0, 380] },
-      "sides": {"depth_percent": 5, "color": [50, 0, 0, 380]}
+    "tile": {
+      "overlay_symbol": {
+        "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 114}, "color": [255, 100, 0, 380] },
+        "sides": {"depth_percent": 5, "color": [50, 0, 0, 380]}
+      }
     }
   },
   "avelisk": {
@@ -58,10 +70,12 @@
     }
   },
   "zeddy": {
-    "detail": {
-      "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 117}, "color": [255, 255, 255]  },
-      "sides": {"depth_percent": 5, "color": [0, 0, 0]},
-      "outline": {"type": "outer", "color": [0, 0, 0]}
+    "unit": {
+      "detail": {
+        "glyph": { "symbol_id": {"font_name": "AthSymbols", "unicode": 117}, "color": [255, 255, 255]  },
+        "sides": {"depth_percent": 5, "color": [0, 0, 0]},
+        "outline": {"type": "outer", "color": [0, 0, 0]}
+      }
     }
   }
 }

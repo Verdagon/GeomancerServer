@@ -8,47 +8,47 @@ using Domino;
 namespace Geomancer {
   public class TerrainTilePresenter {
     private GameToDominoConnection domino;
-    private MemberToViewMapper vivimap;
+    // private MemberToViewMapperOld vivimap;
     public readonly Location location;
     private TerrainTile terrainTile;
     private Geomancer.Model.Terrain terrain;
 
-    ulong tileViewId;
-    ulong unitViewId;
+    string tileViewId = "";
+    string unitViewId = "";
 
     private ulong nextMemberId = 1;
     // (member ID, member string)
-    private List<(ulong, string)> members = new List<(ulong, string)>();
+    private List<(string, string)> members = new List<(string, string)>();
     
     // (member ID, value)
-    private List<(ulong, IVec4iAnimation)> membersFrontColors = new List<(ulong, IVec4iAnimation)>();
-    private List<(ulong, IVec4iAnimation)> membersSideColors = new List<(ulong, IVec4iAnimation)>();
-    private List<(ulong, InitialSymbol)> membersFeatures = new List<(ulong, InitialSymbol)>();
-    private List<(ulong, InitialSymbol)> membersOverlays = new List<(ulong, InitialSymbol)>();
-    private List<(ulong, InitialSymbol)> membersItems = new List<(ulong, InitialSymbol)>();
-    private List<(ulong, InitialSymbol)> membersDominoSymbols = new List<(ulong, InitialSymbol)>();
-    private List<(ulong, IVec4iAnimation)> membersDominoColors = new List<(ulong, IVec4iAnimation)>();
-    private List<(ulong, InitialSymbol)> membersUnitFaces = new List<(ulong, InitialSymbol)>();
-    private List<(ulong, InitialSymbol)> membersDetails = new List<(ulong, InitialSymbol)>();
+    // private List<(string, IVec4iAnimation)> membersFrontColors = new List<(string, IVec4iAnimation)>();
+    // private List<(string, IVec4iAnimation)> membersSideColors = new List<(string, IVec4iAnimation)>();
+    // private List<(string, InitialSymbol)> membersFeatures = new List<(string, InitialSymbol)>();
+    // private List<(string, InitialSymbol)> membersOverlays = new List<(string, InitialSymbol)>();
+    private List<(string, InitialSymbol)> membersItems = new List<(string, InitialSymbol)>();
+    private List<(string, InitialSymbol)> membersDominoSymbols = new List<(string, InitialSymbol)>();
+    private List<(string, IVec4iAnimation)> membersDominoColors = new List<(string, IVec4iAnimation)>();
+    private List<(string, InitialSymbol)> membersUnitFaces = new List<(string, InitialSymbol)>();
+    private List<(string, InitialSymbol)> membersDetails = new List<(string, InitialSymbol)>();
 
     private bool highlighted;
     private bool selected;
 
     public TerrainTilePresenter(
         GameToDominoConnection domino,
-        MemberToViewMapper vivimap,
+        // MemberToViewMapperOld vivimap,
         Geomancer.Model.Terrain terrain,
         Location location,
         TerrainTile terrainTile) {
       this.domino = domino;
-      this.vivimap = vivimap;
+      // this.vivimap = vivimap;
       this.location = location;
       this.terrainTile = terrainTile;
       this.terrain = terrain;
 
-      var eternalMemberId = nextMemberId++;
-      membersFrontColors.Add((eternalMemberId, ConstantVec4iAnimation.blue));
-      membersSideColors.Add((eternalMemberId, ConstantVec4iAnimation.blue));
+      // var eternalMemberId = nextMemberId++;
+      // membersFrontColors.Add((eternalMemberId, ConstantVec4iAnimation.blue));
+      // membersSideColors.Add((eternalMemberId, ConstantVec4iAnimation.blue));
 
       foreach (var member in terrainTile.members) {
         OnAddMember(member);
@@ -61,10 +61,11 @@ namespace Geomancer {
           new InitialTile(
               location,
               terrainTile.elevation,
-              CalculateTintedFrontColor(membersFrontColors[membersFrontColors.Count - 1].Item2, selected, highlighted),
-              membersSideColors[membersSideColors.Count - 1].Item2,
-              CalculateMaybeOverlay(membersOverlays),
-              CalculateMaybeFeature(membersFeatures),
+              terrainTile.members,
+              // CalculateTintedFrontColor(membersFrontColors[membersFrontColors.Count - 1].Item2, selected, highlighted),
+              // membersSideColors[membersSideColors.Count - 1].Item2,
+              // CalculateMaybeOverlay(membersOverlays),
+              // CalculateMaybeFeature(membersFeatures),
               membersItems);
       tileViewId = domino.CreateTile(initialTileDescription);
       
@@ -86,7 +87,7 @@ namespace Geomancer {
       //
       //   var highlighted = false;
       //   var frontColor = highlighted ? new Color(.1f, .1f, .1f) : new Color(0f, 0, 0f);
-      //   var sideColor = highlighted ? new Color(.1f, .1f, .1f) : new Color(0f, 0, 0f);
+      //   var wallColor = highlighted ? new Color(.1f, .1f, .1f) : new Color(0f, 0, 0f);
       //
       // var patternTileIndex = location.indexInGroup;
       // var shapeIndex = pattern.patternTiles[patternTileIndex].shapeIndex;
@@ -97,7 +98,7 @@ namespace Geomancer {
       // var unityElevationStepHeight = terrain.elevationStepHeight * ModelExtensions.ModelToUnityMultiplier;
     }
 
-    private bool initialized => tileViewId != 0;
+    // private bool initialized => tileViewId != 0;
 
     // private InitialTile MakeInitialTile() {
     //   
@@ -109,36 +110,48 @@ namespace Geomancer {
       return positionVec3;
     }
 
+    private void AddOrRemoveMember(bool control, string name) {
+      if (control) {
+        this.members.Add(((this.nextMemberId++).ToString(), name));
+      } else {
+        for (int i = this.members.Count - 1; i >= 0; i--) {
+          if (this.members[0].Item2 == name) {
+            this.members.RemoveAt(i);
+          }
+        }
+      }
+    }
+
     public void SetHighlighted(bool highlighted) {
       this.highlighted = highlighted;
-      RefreshSurfaceColor();
+      AddOrRemoveMember(highlighted, ".highlighted");
     }
     public void SetSelected(bool selected) {
       this.selected = selected;
-      RefreshSurfaceColor();
+      AddOrRemoveMember(highlighted, ".selected");
     }
 
-    private void RefreshSurfaceColor() {
-      domino.SetSurfaceColor(
-          tileViewId, 
-          CalculateTintedFrontColor(
-              membersFrontColors[membersFrontColors.Count - 1].Item2, selected, highlighted));
-    }
-
-    private void RefreshSideColor() {
-      domino.SetCliffColor(tileViewId, membersSideColors[membersSideColors.Count - 1].Item2);
-    }
+    // private void RefreshSurfaceColor() {
+    //   domino.SetSurfaceColor(
+    //       tileViewId,
+    //       CalculateTintedFrontColor(
+    //           membersFrontColors[membersFrontColors.Count - 1].Item2, selected, highlighted));
+    // }
+    //
+    // private void RefreshSideColor() {
+    //   domino.SetCliffColor(tileViewId, membersSideColors[membersSideColors.Count - 1].Item2);
+    // }
     
-    private void RefreshFeature() {
-      domino.SetFeature(tileViewId, membersFeatures.Count == 0 ? null : membersFeatures[membersFeatures.Count - 1].Item2);
-    }
+    // private void RefreshFeature() {
+    //   domino.SetFeature(tileViewId, membersFeatures.Count == 0 ? null : membersFeatures[membersFeatures.Count - 1].Item2);
+    // }
     
     private void RefreshUnit() {
-      if (this.unitViewId != 0) {
+      if (this.unitViewId != "") {
         domino.DestroyUnit(this.unitViewId);
-        this.unitViewId = 0;
+        this.unitViewId = "";
       }
-      if (this.unitViewId == 0 && membersUnitFaces.Count > 0) {
+      if (this.unitViewId == "" && membersUnitFaces.Count > 0) {
         // var defaultColor = new Color(102, 102, 0, 1);
         var defaultSymbol =
                 new InitialSymbol(
@@ -173,10 +186,10 @@ namespace Geomancer {
       RefreshUnit();
     }
 
-    private void RefreshOverlay() {
-      domino.SetOverlay(
-          tileViewId, membersOverlays.Count == 0 ? null : membersOverlays[membersOverlays.Count - 1].Item2);
-    }
+    // private void RefreshOverlay() {
+    //   domino.SetOverlay(
+    //       tileViewId, membersOverlays.Count == 0 ? null : membersOverlays[membersOverlays.Count - 1].Item2);
+    // }
     
     private void RefreshItems() {
       domino.ClearItems(tileViewId);
@@ -196,125 +209,125 @@ namespace Geomancer {
 
     private void OnAddMember(string member) {
       ulong memberId = nextMemberId++;
-      members.Add((memberId, member));
+      members.Add((memberId.ToString(), member));
       // var visitor = new AttributeAddingVisitor(this, memberId);
-      foreach (var thing in vivimap.getEntries(member)) {
-        if (thing is MemberToViewMapper.TopColorDescriptionForIDescription topColor) {
-          membersFrontColors.Add((memberId, topColor.color));
-          if (initialized) {
-            if (tileViewId != 0) {
-              RefreshSurfaceColor();
-            }
-          }
-        } else if (thing is MemberToViewMapper.SideColorDescriptionForIDescription sideColor) {
-          membersSideColors.Add((memberId, sideColor.color));
-          if (initialized) {
-            if (tileViewId != 0) {
-              RefreshSideColor();
-            }
-          }
-        } else if (thing is MemberToViewMapper.OverlayDescriptionForIDescription overlay) {
-          membersOverlays.Add((memberId, overlay.symbol));
-          if (initialized) {
-            if (tileViewId != 0) {
-              RefreshOverlay();
-            }
-          }
-        } else if (thing is MemberToViewMapper.FeatureDescriptionForIDescription feature) {
-          membersFeatures.Add((memberId, feature.symbol));
-          if (initialized) {
-            if (tileViewId != 0) {
-              RefreshFeature();
-            }
-          }
-        } else if (thing is MemberToViewMapper.DominoShapeDescriptionForIDescription dominoShape) {
-          membersDominoSymbols.Add((memberId, dominoShape.symbol));
-          if (initialized) {
-            if (unitViewId == 0) {
-              RefreshUnit();
-            } else {
-              RefreshDomino();
-            }
-          }
-        } else if (thing is MemberToViewMapper.FaceDescriptionForIDescription face) {
-          membersUnitFaces.Add((memberId, face.symbol));
-          if (initialized) {
-            if (unitViewId == 0) {
-              RefreshUnit();
-            } else {
-              RefreshUnitFace();
-            }
-          }
-        } else if (thing is MemberToViewMapper.DetailDescriptionForIDescription detail) {
-          membersDetails.Add((memberId, detail.symbol));
-          if (initialized) {
-            if (unitViewId == 0) {
-              RefreshUnit();
-            } else {
-              RefreshDetails();
-            }
-          }
-        } else if (thing is MemberToViewMapper.ItemDescriptionForIDescription item) {
-          membersItems.Add((memberId, item.symbol));
-          if (initialized) {
-            if (tileViewId != 0) {
-              RefreshItems();
-            }
-          }
-        } else {
-          Asserts.Assert(false);
-        }
-      }
+      // foreach (var thing in vivimap.getEntries(member)) {
+      //   if (thing is MemberToViewMapperOld.TopColorDescriptionForIDescription topColor) {
+      //     membersFrontColors.Add((memberId, topColor.color));
+      //     if (initialized) {
+      //       if (tileViewId != 0) {
+      //         RefreshSurfaceColor();
+      //       }
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.SideColorDescriptionForIDescription wallColor) {
+      //     membersSideColors.Add((memberId, wallColor.color));
+      //     if (initialized) {
+      //       if (tileViewId != 0) {
+      //         RefreshSideColor();
+      //       }
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.OverlayDescriptionForIDescription overlay) {
+      //     membersOverlays.Add((memberId, overlay.symbol));
+      //     if (initialized) {
+      //       if (tileViewId != 0) {
+      //         RefreshOverlay();
+      //       }
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.FeatureDescriptionForIDescription feature) {
+      //     membersFeatures.Add((memberId, feature.symbol));
+      //     if (initialized) {
+      //       if (tileViewId != 0) {
+      //         RefreshFeature();
+      //       }
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.DominoShapeDescriptionForIDescription dominoShape) {
+      //     membersDominoSymbols.Add((memberId, dominoShape.symbol));
+      //     if (initialized) {
+      //       if (unitViewId == 0) {
+      //         RefreshUnit();
+      //       } else {
+      //         RefreshDomino();
+      //       }
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.FaceDescriptionForIDescription face) {
+      //     membersUnitFaces.Add((memberId, face.symbol));
+      //     if (initialized) {
+      //       if (unitViewId == 0) {
+      //         RefreshUnit();
+      //       } else {
+      //         RefreshUnitFace();
+      //       }
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.DetailDescriptionForIDescription detail) {
+      //     membersDetails.Add((memberId, detail.symbol));
+      //     if (initialized) {
+      //       if (unitViewId == 0) {
+      //         RefreshUnit();
+      //       } else {
+      //         RefreshDetails();
+      //       }
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.ItemDescriptionForIDescription item) {
+      //     membersItems.Add((memberId, item.symbol));
+      //     if (initialized) {
+      //       if (tileViewId != 0) {
+      //         RefreshItems();
+      //       }
+      //     }
+      //   } else {
+      //     Asserts.Assert(false);
+      //   }
+      // }
     }
 
     public void OnRemoveMember(int index) {
       var (memberId, member) = members[index];
       members.RemoveAt(index);
-      foreach (var thing in vivimap.getEntries(member)) {
-        if (thing is MemberToViewMapper.TopColorDescriptionForIDescription topColor) {
-          membersFrontColors.RemoveAll(x => x.Item1 == memberId);
-          if (tileViewId != 0) {
-            RefreshSurfaceColor();
-          }
-        } else if (thing is MemberToViewMapper.SideColorDescriptionForIDescription sideColor) {
-          membersSideColors.RemoveAll(x => x.Item1 == memberId);
-          if (tileViewId != 0) {
-            RefreshSideColor();
-          }
-        } else if (thing is MemberToViewMapper.OverlayDescriptionForIDescription overlay) {
-          membersOverlays.RemoveAll(x => x.Item1 == memberId);
-          if (tileViewId != 0) {
-            RefreshOverlay();
-          }
-        } else if (thing is MemberToViewMapper.FeatureDescriptionForIDescription feature) {
-          membersFeatures.RemoveAll(x => x.Item1 == memberId);
-          if (tileViewId != 0) {
-            RefreshFeature();
-          }
-        } else if (thing is MemberToViewMapper.DominoShapeDescriptionForIDescription dominoShape) {
-          membersDominoSymbols.RemoveAll(x => x.Item1 == memberId);
-          if (unitViewId != 0) {
-            RefreshDomino();
-          }
-        } else if (thing is MemberToViewMapper.FaceDescriptionForIDescription face) {
-          membersUnitFaces.RemoveAll(x => x.Item1 == memberId);
-          if (unitViewId != 0) {
-            RefreshUnitFace();
-          }
-        } else if (thing is MemberToViewMapper.DetailDescriptionForIDescription detail) {
-          membersDetails.RemoveAll(x => x.Item1 == memberId);
-          if (unitViewId != 0) {
-            RefreshDetails();
-          }
-        } else if (thing is MemberToViewMapper.ItemDescriptionForIDescription item) {
-          membersItems.RemoveAll(x => x.Item1 == memberId);
-          if (tileViewId != 0) {
-            RefreshItems();
-          }
-        } else {
-          Asserts.Assert(false);
-        }
-      }
+      // foreach (var thing in vivimap.getEntries(member)) {
+      //   if (thing is MemberToViewMapperOld.TopColorDescriptionForIDescription topColor) {
+      //     membersFrontColors.RemoveAll(x => x.Item1 == memberId);
+      //     if (tileViewId != 0) {
+      //       RefreshSurfaceColor();
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.SideColorDescriptionForIDescription wallColor) {
+      //     membersSideColors.RemoveAll(x => x.Item1 == memberId);
+      //     if (tileViewId != 0) {
+      //       RefreshSideColor();
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.OverlayDescriptionForIDescription overlay) {
+      //     membersOverlays.RemoveAll(x => x.Item1 == memberId);
+      //     if (tileViewId != 0) {
+      //       RefreshOverlay();
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.FeatureDescriptionForIDescription feature) {
+      //     membersFeatures.RemoveAll(x => x.Item1 == memberId);
+      //     if (tileViewId != 0) {
+      //       RefreshFeature();
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.DominoShapeDescriptionForIDescription dominoShape) {
+      //     membersDominoSymbols.RemoveAll(x => x.Item1 == memberId);
+      //     if (unitViewId != 0) {
+      //       RefreshDomino();
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.FaceDescriptionForIDescription face) {
+      //     membersUnitFaces.RemoveAll(x => x.Item1 == memberId);
+      //     if (unitViewId != 0) {
+      //       RefreshUnitFace();
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.DetailDescriptionForIDescription detail) {
+      //     membersDetails.RemoveAll(x => x.Item1 == memberId);
+      //     if (unitViewId != 0) {
+      //       RefreshDetails();
+      //     }
+      //   } else if (thing is MemberToViewMapperOld.ItemDescriptionForIDescription item) {
+      //     membersItems.RemoveAll(x => x.Item1 == memberId);
+      //     if (tileViewId != 0) {
+      //       RefreshItems();
+      //     }
+      //   } else {
+      //     Asserts.Assert(false);
+      //   }
+      // }
     }
 
     public void AddMember(string member) {
@@ -374,11 +387,11 @@ namespace Geomancer {
       domino.DestroyTile(tileViewId);
     }
 
-    private static InitialSymbol CalculateMaybeOverlay(List<(ulong, InitialSymbol)> membersOverlays) {
+    private static InitialSymbol CalculateMaybeOverlay(List<(string, InitialSymbol)> membersOverlays) {
       return membersOverlays.Count == 0 ? null : membersOverlays[membersOverlays.Count - 1].Item2;
     }
 
-    private static InitialSymbol CalculateMaybeFeature(List<(ulong, InitialSymbol)> membersFeatures) {
+    private static InitialSymbol CalculateMaybeFeature(List<(string, InitialSymbol)> membersFeatures) {
       return membersFeatures.Count == 0 ? null : membersFeatures[membersFeatures.Count - 1].Item2;
     }
 

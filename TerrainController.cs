@@ -18,7 +18,7 @@ namespace Geomancer {
 
     // IClock clock;
     // ITimer timer;
-    MemberToViewMapper vivimap;
+    // MemberToViewMapperOld vivimap;
 
     public readonly Geomancer.Model.Terrain terrain;
 
@@ -32,12 +32,12 @@ namespace Geomancer {
 
     public TerrainController(
         GameToDominoConnection domino,
-        MemberToViewMapper vivimap,
+        // MemberToViewMapperOld vivimap,
         Geomancer.Model.Terrain terrain) {
       this.domino = domino;
       // this.clock = clock;
       // this.timer = timer;
-      this.vivimap = vivimap;
+      // this.vivimap = vivimap;
       this.terrain = terrain;
       // this.loader = loader;
       // this.tileShapeMeshCache = tileShapeMeshCache;
@@ -129,7 +129,7 @@ namespace Geomancer {
     }
 
     private void addTerrainTile(Location location, TerrainTile tile) {
-      var presenter = new TerrainTilePresenter(domino, vivimap, terrain, location, tile);
+      var presenter = new TerrainTilePresenter(domino, terrain, location, tile);
       tilePresenters.Add(location, presenter);
     }
 
@@ -158,7 +158,7 @@ namespace Geomancer {
       }
     }
 
-    public void LocationMouseDown(ulong tileViewId, Location location) {
+    public void LocationMouseDown(string tileViewId, Location location) {
       if (location != null) {
         if (tilePresenters.TryGetValue(maybeMouseHighlightedLocation, out var newMousedTerrainTilePresenter)) {
           TerrainTileClicked?.Invoke(maybeMouseHighlightedLocation);

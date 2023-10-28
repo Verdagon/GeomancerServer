@@ -34,10 +34,52 @@ namespace Geomancer {
 
       Console.WriteLine("Listening...");
 
-      var (editor, gameToDominoConnection) = HandleStartRequest(listener);
-      
-      while (HandleRequest(listener, editor, gameToDominoConnection)) { }
-      
+      while (true) {
+        try {
+          // Note: The GetContext method blocks while waiting for a request.
+          HttpListenerContext startRequestContext = listener.GetContext();
+          HttpListenerRequest startRequest = startRequestContext.Request;
+          var startRequestStr = new StreamReader(startRequest.InputStream).ReadToEnd();
+          Console.WriteLine("Got request:\n" + startRequestStr);
+          var startRequestsNode = JSONObject.Parse(startRequestStr);
+          var startRequestsObj = JsonHarvester.ExpectObject(startRequestsNode, "Expected JSON object!");
+          var startRequestsArray = JsonHarvester.ExpectMemberArray(startRequestsObj, "requests");
+          if (startRequestsArray.Count != 1) {
+            throw new Exception("Expected array field 'requests' of length 1, was length " + startRequestsArray.Count);
+          }
+          var startRequestNode = startRequestsArray[0];
+          var startRequestObj = JsonHarvester.ExpectObject(startRequestNode, "Request must be an object!");
+          var startRequestType = JsonHarvester.ExpectMemberString(startRequestObj, "request_type");
+          if (startRequestType == "Reset") {
+            HttpListenerResponse response = startRequestContext.Response;
+            byte[] buffer = System.Text.Encoding.UTF8.GetBytes("{\"commands\":[]}");
+            response.ContentLength64 = buffer.Length;
+            System.IO.Stream output = response.OutputStream;
+            output.Write(buffer, 0, buffer.Length);
+            output.Close();
+            continue;
+          }
+          if (startRequestType != "Start") {
+            throw new Exception("First request must be start!");
+          }
+          var gameToDominoConnection = new GameToDominoConnection();
+          var editor =
+              new EditorServer(
+                  System.IO.Directory.GetCurrentDirectory(),
+                  gameToDominoConnection,
+                  JsonHarvester.ExpectMemberInteger(startRequestObj, "screen_grid_width"),
+                  JsonHarvester.ExpectMemberInteger(startRequestObj, "screen_grid_height"));
+          Respond(startRequestContext, gameToDominoConnection);
+
+          while (HandleRequest(listener, editor, gameToDominoConnection)) { }
+        }
+        catch (Exception e) {
+          Console.WriteLine("Encountered exception:");
+          Console.WriteLine(e.Message);
+        }
+        Console.WriteLine("Restarting!");
+      }
+
       listener.Stop();
     }
 
@@ -67,29 +109,6 @@ namespace Geomancer {
       // You must close the output stream.
       output.Close();
     }
-    
-    private static (EditorServer, GameToDominoConnection) HandleStartRequest(HttpListener listener) {
-      // Note: The GetContext method blocks while waiting for a request.
-      HttpListenerContext startRequestContext = listener.GetContext();
-      HttpListenerRequest startRequest = startRequestContext.Request;
-      var startRequestStr = new StreamReader(startRequest.InputStream).ReadToEnd();
-      Console.WriteLine("Got request:\n" + startRequestStr);
-      var startRequestNode = JSONObject.Parse(startRequestStr);
-      var startRequestObj = JsonHarvester.ExpectObject(startRequestNode, "Request must be an object!");
-      var startRequestType = JsonHarvester.ExpectMemberString(startRequestObj, "request_type");
-      if (startRequestType != "Start") {
-        throw new Exception("First request must be start!");
-      }
-      var gameToDominoConnection = new GameToDominoConnection();
-      var editor =
-          new EditorServer(
-              System.IO.Directory.GetCurrentDirectory(),
-              gameToDominoConnection,
-              JsonHarvester.ExpectMemberInteger(startRequestObj, "screen_grid_width"),
-              JsonHarvester.ExpectMemberInteger(startRequestObj, "screen_grid_height"));
-      Respond(startRequestContext, gameToDominoConnection);
-      return (editor, gameToDominoConnection);
-    }
 
     private static bool HandleRequest(
         HttpListener listener,
@@ -100,24 +119,38 @@ namespace Geomancer {
       HttpListenerRequest request = requestContext.Request;
       var requestStr = new StreamReader(request.InputStream).ReadToEnd();
       Console.WriteLine("Got request:\n" + requestStr);
-      var requestNode = JSONObject.Parse(requestStr);
-      var requestObj = JsonHarvester.ExpectObject(requestNode, "Request must be an object!");
-      var requestType = JsonHarvester.ExpectMemberString(requestObj, "event_type");
+      var requestsNode = JSONObject.Parse(requestStr);
+      var requestsObj = JsonHarvester.ExpectObject(requestsNode, "Expected JSON object!");
+      var requestsArray = JsonHarvester.ExpectMemberArray(requestsObj, "requests");
       bool keepRunning = true;
-      switch (requestType) {
-        case "SetHoveredLocation":
-          HandleSetHoveredLocation(server, requestObj);
+      foreach (var requestNode in requestsArray) {
+        var requestObj = JsonHarvester.ExpectObject(requestNode, "Request must be an object!");
+        var requestType = JsonHarvester.ExpectMemberString(requestObj, "request_type");
+        switch (requestType) {
+          case "Reset":
+            Console.WriteLine("Got Reset request, stopping...");
+            keepRunning = false;
+            break;
+          case "SetHoveredLocation":
+            HandleSetHoveredLocation(server, requestObj);
+            break;
+          case "LocationMouseDown":
+            HandleLocationMouseDown(server, requestObj);
+            break;
+          case "KeyDown":
+            HandleKeyDown(server, requestObj);
+            break;
+          case "Custom":
+            HandleCustomRequest(server, requestObj);
+            break;
+          default:
+            Asserts.Assert(false, "Unknown request: " + requestType);
+            keepRunning = false;
+            break;
+        }
+        if (!keepRunning) {
           break;
-        case "LocationMouseDown":
-          HandleLocationMouseDown(server, requestObj);
-          break;
-        case "KeyDown":
-          HandleKeyDown(server, requestObj);
-          break;
-        default:
-          Asserts.Assert(false, "Unknown request: " + requestType);
-          keepRunning = false;
-          break;
+        }
       }
       Respond(requestContext, gameToDominoConnection);
       return keepRunning;
@@ -127,7 +160,7 @@ namespace Geomancer {
         EditorServer server,
         JSONObject requestObj) {
       server.SetHoveredLocation(
-          JsonHarvester.ExpectMemberULong(requestObj, "tile_id"),
+          JsonHarvester.GetMaybeMemberString(requestObj, "tile_id", out var s) ? s : "",
           JsonHarvester.GetMaybeMemberLocation(requestObj, "location", out var loc) ? loc : null);
     }
 
@@ -135,10 +168,17 @@ namespace Geomancer {
         EditorServer server,
         JSONObject requestObj) {
       server.LocationMouseDown(
-          JsonHarvester.ExpectMemberULong(requestObj, "tile_id"),
+          JsonHarvester.ExpectMemberString(requestObj, "tile_id"),
           JsonHarvester.ExpectMemberLocation(requestObj, "location"));
     }
-    
+
+    private static void HandleCustomRequest(
+        EditorServer server,
+        JSONObject requestObj) {
+      server.HandleCustomRequest(
+          JsonHarvester.ExpectMemberObject(requestObj, "data"));
+    }
+
     private static void HandleKeyDown(
         EditorServer server,
         JSONObject requestObj) {

@@ -10,7 +10,7 @@ using SimpleJSON;
 
 
 namespace Geomancer {
-  public class MemberToViewMapper {
+  public class MemberToViewMapperOld {
     public interface IDescriptionVisitor {
       void visitTileTopColor(TopColorDescriptionForIDescription color);
       void visitTileSideColor(SideColorDescriptionForIDescription color);
@@ -71,7 +71,7 @@ namespace Geomancer {
     }
 
     Dictionary<string, List<IDescription>> entries;
-    public MemberToViewMapper(Dictionary<string, List<IDescription>> entries) {
+    public MemberToViewMapperOld(Dictionary<string, List<IDescription>> entries) {
       this.entries = entries;
     }
 
@@ -82,7 +82,7 @@ namespace Geomancer {
       return entries[name];
     }
 
-    public static MemberToViewMapper LoadMap(string resourcesPath, string filename) {
+    public static MemberToViewMapperOld LoadMap(string resourcesPath, string filename) {
       string filePath = System.IO.Path.Combine(resourcesPath, filename);
       string jsonStr = System.IO.File.ReadAllText(filePath);
       var entries = new Dictionary<string, List<IDescription>>();
@@ -136,7 +136,7 @@ namespace Geomancer {
           throw new Exception("Unknown key: " + unknownKey);
         }
       }
-      return new MemberToViewMapper(entries);
+      return new MemberToViewMapperOld(entries);
     }
   }
 }

@@ -21,7 +21,7 @@ namespace Geomancer {
     private int elevationStepHeight;
     
     Vec3 tileCenter;
-    ulong tileViewId;
+    string tileViewId = "";
     private bool highlighted;
     private GameToDominoConnection domino;
 
@@ -48,22 +48,23 @@ namespace Geomancer {
 
     private static (IVec4iAnimation, IVec4iAnimation) GetColors(bool highlighted) {
       var frontColor = highlighted ? new Vec4i(51, 51, 51, 255) : new Vec4i(0, 0, 0, 255);
-      var sideColor = highlighted ? new Vec4i(51, 51, 51, 255) : new Vec4i(0, 0, 0, 255);
-      return (new ConstantVec4iAnimation(frontColor), new ConstantVec4iAnimation(sideColor));
+      var wallColor = highlighted ? new Vec4i(51, 51, 51, 255) : new Vec4i(0, 0, 0, 255);
+      return (new ConstantVec4iAnimation(frontColor), new ConstantVec4iAnimation(wallColor));
     }
     
     public void SetHighlighted(bool highlighted) {
-      var (frontColor, sideColor) = GetColors(highlighted);
-      domino.SetSurfaceColor(tileViewId, frontColor);
-      domino.SetCliffColor(tileViewId, sideColor);
+      // var (frontColor, wallColor) = GetColors(highlighted);
+      Console.WriteLine("TODO: SetHighlighted");
+      // domino.SetSurfaceColor(tileViewId, frontColor);
+      // domino.SetCliffColor(tileViewId, wallColor);
       // tileView.SetDescription(GetTileDescription(pattern, location, highlighted));
     }
 
     private void ResetViews() {
-      if (tileViewId != 0) {
+      if (tileViewId != "") {
         domino.DestroyTile(tileViewId);
         // tileView.DestroyTile();
-        tileViewId = 0;
+        tileViewId = "";
       }
 
       var position = CalculatePosition(elevationStepHeight, pattern, location);
@@ -118,21 +119,22 @@ namespace Geomancer {
         Pattern pattern, Location location, float elevationStepHeight, bool highlighted) {
       var patternTile = pattern.patternTiles[location.indexInGroup];
 
-      var (frontColor, sideColor) = GetColors(highlighted);
+      var (frontColor, wallColor) = GetColors(highlighted);
     
       return new InitialTile(
           location,
           1,
-          frontColor,
-          sideColor,
-          null,
-          null,
-          new List<(ulong, InitialSymbol)>());
+          new List<string>(new string[]{"_phantom"}),
+          // frontColor,
+          // wallColor,
+          // null,
+          // null,
+          new List<(string, InitialSymbol)>());
     }
 
     public void DestroyPhantomTilePresenter() {
       domino.DestroyTile(tileViewId);// tileView.DestroyTile();
-      tileViewId = 0;
+      tileViewId = "";
     }
 
     // public void OnStrMutListEffect(IStrMutListEffect effect) {
